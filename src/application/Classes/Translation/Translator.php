@@ -8,19 +8,28 @@
  * Time: 16:14
  */
 
-namespace Classes\Translation;
-
+namespace src\application\Classes\Translation;
 
 class Translator
 {
     private $inputLanguage;
     private $outputLanguage;
 
-    public function __construct($text = null)
+    public function __construct($text = null, $inputLanguage = null, $outputLanguage = null)
     {
         if($text !== null)
         {
             $this->text = $text;
+        }
+
+        if($inputLanguage !== null)
+        {
+            $this->inputLanguage = $inputLanguage;
+        }
+
+        if($outputLanguage !== null)
+        {
+            $this->outputLanguage = $outputLanguage;
         }
     }
 
@@ -79,7 +88,7 @@ class Translator
         // Check language available
         if($this->languageConversionAvailable($this->inputLanguage, $this->outputLanguage))
         {
-            $languageFile = '\Classes\Translation\\'. $this->inputLanguage .'\\'. $this->outputLanguage;
+            $languageFile = DIRECTORY_SEPARATOR . __NAMESPACE__ . DIRECTORY_SEPARATOR . $this->inputLanguage . DIRECTORY_SEPARATOR . $this->outputLanguage;
             $conversion = new $languageFile($this->text);
             return $conversion->convert();
         }
@@ -128,7 +137,7 @@ class Translator
 
         if($this->languageConversionAvailable($inputLanguage, $outputLanguage))
         {
-            $languageFile = '\Classes\Translation\\'. $inputLanguage .'\\'. $outputLanguage;
+            $languageFile = DIRECTORY_SEPARATOR . __NAMESPACE__ . DIRECTORY_SEPARATOR . $inputLanguage . DIRECTORY_SEPARATOR . $outputLanguage;
             $quickConversion = new $languageFile($text);
             return $quickConversion->convert();
         }

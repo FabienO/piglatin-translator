@@ -8,9 +8,9 @@
  * English to PigLatin translation
  */
 
-namespace Classes\Translation\English;
+namespace src\application\Classes\Translation\English;
 
-class PigLatin implements \Classes\Translation\Language
+class PigLatin implements \src\application\Classes\Translation\Language
 {
     /**
      * The string to be converted

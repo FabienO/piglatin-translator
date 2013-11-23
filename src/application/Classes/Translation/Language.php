@@ -8,8 +8,7 @@
  * Time: 16:39
  */
 
-namespace Classes\Translation;
-
+namespace src\application\Classes\Translation;
 
 interface Language
 {
