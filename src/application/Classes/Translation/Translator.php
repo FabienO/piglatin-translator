@@ -15,13 +15,14 @@ class Translator
     private $inputLanguage;
     private $outputLanguage;
 
-    public function __construct($text = null, $inputLanguage = null, $outputLanguage = null)
+    /**
+     * Set intent of language conversion
+     *
+     * @param null $inputLanguage
+     * @param null $outputLanguage
+     */
+    public function __construct($inputLanguage = null, $outputLanguage = null)
     {
-        if($text !== null)
-        {
-            $this->text = $text;
-        }
-
         if($inputLanguage !== null)
         {
             $this->inputLanguage = $inputLanguage;
@@ -33,26 +34,22 @@ class Translator
         }
     }
 
-    private function checkTextSet()
-    {
-        if(isset($this->text) && $this->text !== null)
-        {
-            return true;
-        }
-        else
-        {
-            throw new \Exception('No text set to convert. Please utilise the setText() method.');
-        }
-    }
-
     /**
      * For easy text changing
      *
      * @param null $text
+     * @throws \Exception
      */
     public function setText($text = null)
     {
-        $this->text = $text;
+        if($text !== null)
+        {
+            $this->text = $text;
+        }
+        else
+        {
+            throw new \Exception('Text not set');
+        }
     }
 
     /**
@@ -78,18 +75,26 @@ class Translator
     /**
      * The actual conversion method which uses the correct language conversion class
      *
+     * @param null $text
      * @return mixed
      * @throws \Exception
      */
-    public function convert()
+    public function convert($text = null)
     {
-        $this->checkTextSet();
+        try
+        {
+            $this->setText($text);
+        }
+        catch(\Exception $e)
+        {
+            echo $e->getMessage();
+        }
 
         // Check language available
         if($this->languageConversionAvailable($this->inputLanguage, $this->outputLanguage))
         {
-            $languageFile = DIRECTORY_SEPARATOR . __NAMESPACE__ . DIRECTORY_SEPARATOR . $this->inputLanguage . DIRECTORY_SEPARATOR . $this->outputLanguage;
-            $conversion = new $languageFile($this->text);
+            $languageClass = '\\'. __NAMESPACE__ . '\\' . $this->inputLanguage . '\\' . $this->outputLanguage;
+            $conversion = new $languageClass($this->text);
             return $conversion->convert();
         }
         else
@@ -118,10 +123,8 @@ class Translator
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
         else
         {
@@ -137,8 +140,8 @@ class Translator
 
         if($this->languageConversionAvailable($inputLanguage, $outputLanguage))
         {
-            $languageFile = DIRECTORY_SEPARATOR . __NAMESPACE__ . DIRECTORY_SEPARATOR . $inputLanguage . DIRECTORY_SEPARATOR . $outputLanguage;
-            $quickConversion = new $languageFile($text);
+            $languageClass = '\\' . __NAMESPACE__ . '\\' . $inputLanguage . '\\' . $outputLanguage;
+            $quickConversion = new $languageClass($text);
             return $quickConversion->convert();
         }
     }

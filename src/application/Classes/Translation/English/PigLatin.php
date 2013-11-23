@@ -38,7 +38,7 @@ class PigLatin implements \src\application\Classes\Translation\Language
      * @param null $sentence
      * @return array
      */
-    private function splitString($sentence = null)
+    protected function splitString($sentence = null)
     {
         return array_filter(explode(' ', $sentence));
     }
@@ -48,7 +48,7 @@ class PigLatin implements \src\application\Classes\Translation\Language
      *
      * @return array
      */
-    private function splitToLines() {
+    protected function splitToLines() {
         return preg_split("[\r\n]", $this->text);
     }
 
@@ -58,7 +58,7 @@ class PigLatin implements \src\application\Classes\Translation\Language
      * @param null $word
      * @return array|bool
      */
-    private function splitConstVowel($word = null)
+    protected function splitConstVowel($word = null)
     {
         $vowels = array('a', 'e', 'i', 'o', 'u');
         preg_match_all('/([aeiou]+)|([bcdfghjklmnpqrstvwxyz.]+)/i', $word, $matches);
@@ -81,7 +81,7 @@ class PigLatin implements \src\application\Classes\Translation\Language
      *
      * @return string
      */
-    private function parseText()
+    protected function parseText()
     {
         $string = '';
         $lines = $this->splitToLines();
@@ -115,25 +115,26 @@ class PigLatin implements \src\application\Classes\Translation\Language
      * @param array $splitWord
      * @return string
      */
-    private function parseWord(array $splitWord = array())
+    protected function parseWord(array $splitWord = array())
     {
         if(count($splitWord) > 1)
         {
-            return $this->multipleCharacterGroupWord($splitWord);
+            return $this->handleMultipleCharacterSplits($splitWord);
         }
         else
         {
-            return $this->singleCharacterGroupWord($splitWord);
+            return $this->handleSingleCharacterSplits($splitWord);
         }
     }
 
     /**
-     * Handle words that have multiple character splits
+     * PigLatin's the words once split by vowels/consonants which have a
+     * count greater than 1
      *
      * @param array $array
      * @return string
      */
-    public function multipleCharacterGroupWord(array $array = array())
+    protected function handleMultipleCharacterSplits(array $array = array())
     {
         $word = '';
         $end = 'ay';
@@ -171,12 +172,13 @@ class PigLatin implements \src\application\Classes\Translation\Language
     }
 
     /**
-     * Handle words with single character splits
+     * PigLatin's the words once split by vowels/consonants which have a
+     * count equal to 1
      *
      * @param array $array
      * @return string
      */
-    public function singleCharacterGroupWord(array $array = array())
+    protected function handleSingleCharacterSplits(array $array = array())
     {
         $word = '';
         $end = 'ay';
@@ -187,13 +189,11 @@ class PigLatin implements \src\application\Classes\Translation\Language
         if(strpos($array['0'], '.') !== false)
         {
             $array[0] = str_replace('.', '', $array['0']);
-            $word = $array['0'] .'\''. $end;
+            return $array['0'] .'\''. $end;
         }
         else
         {
-            $word = $array['0'] .'\''. $end;
+            return $array['0'] .'\''. $end;
         }
-
-        return $word;
     }
 } 

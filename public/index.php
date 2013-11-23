@@ -3,8 +3,8 @@
 require_once '../src/application/bootloader.php';
 
 $title = 'Pig Latin Translator';
-$translation = new src\application\Classes\Translation\Translator($title, 'English', 'PigLatin');
-$translatedTitle = $translation->convert();
+$translation = new src\application\Classes\Translation\Translator('English', 'PigLatin');
+$translatedTitle = $translation->convert($title);
 
 $text = '';
 if(isset($_POST['text']) && $_POST['text'] != '') {
