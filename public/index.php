@@ -8,6 +8,7 @@ $translatedTitle = $translation->convert();
 
 $text = '';
 if(isset($_POST['text']) && $_POST['text'] != '') {
+    // This is duplicate code. Here only to demonstrate the quickTranslate works for demonstration only
     $text = $translation->quickTranslate('English', 'PigLatin', $_POST['text']);
 }
 ?>
