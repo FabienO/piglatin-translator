@@ -18,104 +18,114 @@ class Translator
     /**
      * Set intent of language conversion
      *
-     * @param null $inputLanguage
-     * @param null $outputLanguage
+     * @param string $inputLanguage
+     * @param string $outputLanguage
      */
-    public function __construct($inputLanguage = null, $outputLanguage = null)
+    public function __construct($inputLanguage = '', $outputLanguage = '')
     {
-        if($inputLanguage !== null)
+        if(isset($inputLanguage) && $inputLanguage != '')
         {
             $this->inputLanguage = $inputLanguage;
         }
 
-        if($outputLanguage !== null)
+        if(isset($outputLanguage) && $outputLanguage != '')
         {
             $this->outputLanguage = $outputLanguage;
         }
     }
 
     /**
-     * For easy text changing
+     * Set the input language
+     * Potentially expand in to language detection but for now simply state your language
      *
-     * @param null $text
+     * @param string $inputLanguage
      * @throws \Exception
      */
-    public function setText($text = null)
+    public function setInputLanguage($inputLanguage = '')
     {
-        if($text !== null)
+        if(isset($inputLanguage) && $inputLanguage != '')
         {
-            $this->text = $text;
+            $this->inputLanguage = $inputLanguage;
         }
         else
         {
-            throw new \Exception('Text not set');
+            throw new \Exception('No input language provided');
         }
-    }
-
-    /**
-     * Potentially expand in to language detection but for now simply state your language
-     *
-     * @param null $inputLanguage
-     */
-    public function setInputLanguage($inputLanguage = null)
-    {
-        $this->inputLanguage = $inputLanguage;
     }
 
     /**
      * Language we convert to
      *
-     * @param null $outputLanguage
+     * @param string $outputLanguage
+     * @throws \Exception
      */
-    public function setOutputLanguage($outputLanguage = null)
+    public function setOutputLanguage($outputLanguage = '')
     {
-        $this->outputLanguage = $outputLanguage;
+        if(isset($outputLanguage) && $outputLanguage != '')
+        {
+            $this->outputLanguage = $outputLanguage;
+        }
+        else
+        {
+            throw new \Exception('No input language provided');
+        }
     }
 
     /**
      * The actual conversion method which uses the correct language conversion class
      *
-     * @param null $text
+     * @param string $text
      * @return mixed
      * @throws \Exception
      */
-    public function convert($text = null)
+    public function convert($text = '')
     {
-        try
+        $errors = array();
+        if(!isset($text) || $text == '')
         {
-            $this->setText($text);
+            $errors[] = 'No text input to translate.';
         }
-        catch(\Exception $e)
+
+        if(!isset($this->inputLanguage) || $this->inputLanguage == '')
         {
-            echo $e->getMessage();
+            $errors[] = 'No input language specified.';
+        }
+
+        if(!isset($this->inputLanguage) || $this->inputLanguage == '')
+        {
+            $errors[] = 'No output language specified.';
+        }
+
+        if(!$this->languageConversionAvailable($this->inputLanguage, $this->outputLanguage))
+        {
+            $errors[] = 'Language conversion not available for selected language.';
         }
 
         // Check language available
-        if($this->languageConversionAvailable($this->inputLanguage, $this->outputLanguage))
+        if(empty($errors))
         {
-            $languageClass = '\\'. __NAMESPACE__ . '\\' . $this->inputLanguage . '\\' . $this->outputLanguage;
-            $conversion = new $languageClass($this->text);
-            return $conversion->convert();
+            $languageClassPath = $this->getClassName($this->inputLanguage, $this->outputLanguage);
+            return (new $languageClassPath($text))->convert();
         }
         else
         {
-            throw new \Exception('Language you are trying to convert to is not available');
+            throw new \Exception(pre_r($errors));
         }
     }
 
     /**
      * to do: Convert to DB stored list
      *
-     * @param null $inputLanguage
-     * @param null $outputLanguage
+     * @param string $inputLanguage
+     * @param string $outputLanguage
      * @return bool
      * @throws \Exception
      */
-    protected function languageConversionAvailable($inputLanguage = null, $outputLanguage = null)
+    protected function languageConversionAvailable($inputLanguage = '', $outputLanguage = '')
     {
         $availableLanguages[$inputLanguage] = array('PigLatin');
-        $inputLanguage = $inputLanguage !== null ? $inputLanguage : $this->inputLanguage;
-        $outputLanguage = $outputLanguage !== null ? $outputLanguage : $this->outputLanguage;
+        $inputLanguage = isset($inputLanguage) && $inputLanguage == '' ? $inputLanguage : $this->inputLanguage;
+        $outputLanguage = isset($outputLanguage) && $outputLanguage == '' ? $outputLanguage : $this->outputLanguage;
 
         if($outputLanguage != '' && $inputLanguage != '')
         {
@@ -132,17 +142,30 @@ class Translator
         }
     }
 
-    public function quickTranslate($inputLanguage = null, $outputLanguage = null, $text = null)
+    /**
+     * A quick translation feature.
+     *
+     * @param string $inputLanguage
+     * @param string $outputLanguage
+     * @param string $text
+     * @return mixed
+     * @throws \Exception
+     */
+    public function quickTranslate($inputLanguage = '', $outputLanguage = '', $text = '')
     {
-        if($inputLanguage === null || $outputLanguage === null || $text === null) {
+        if(!isset($inputLanguage) || $inputLanguage == '' || !isset($outputLanguage) || $outputLanguage == '' || !isset($text) || $text == '') {
             throw new \Exception('You are missing a parameter. Usage: quickConvert(language_from, language_to, text)');
         }
 
         if($this->languageConversionAvailable($inputLanguage, $outputLanguage))
         {
-            $languageClass = '\\' . __NAMESPACE__ . '\\' . $inputLanguage . '\\' . $outputLanguage;
-            $quickConversion = new $languageClass($text);
-            return $quickConversion->convert();
+            $languageClassPath = $this->getClassName($this->inputLanguage, $this->outputLanguage);
+            return (new $languageClassPath($text))->convert();
         }
+    }
+
+    protected function getClassName($inputLanguage = '', $outputLanguage = '')
+    {
+        return '\\' . __NAMESPACE__ . '\\' . $inputLanguage . '\\' . $outputLanguage;
     }
 } 
